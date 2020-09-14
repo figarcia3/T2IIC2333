@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -7,22 +5,31 @@
 #include <unistd.h>
 #include <time.h>
 
-typedef struct proceso
+typedef struct process
 {
-  char nombre[255];
+  char nombre[32];
   int pid;
-  int tiempo_inicio;
+  int init_time;
   int deadline;
   int CPU_burst;
   int IO_burst;
-} Proceso;
 
-typedef struct cola
+  Burst *burst_linked; // 2 * cpu_burst - 1
+
+  int state;
+} Process;
+
+typedef struct burst
 {
+  int type;
+  int exec_time;
+  Burst *next;
+} Burst;
 
-} Cola;
-
-
+typedef struct queu
+{
+  Process *array;
+} Queu;
 
 int main(int argc, char *argv[])
 {
@@ -41,11 +48,11 @@ int main(int argc, char *argv[])
   fgets(line, sizeof(line), file);            // Leo la primera linea
   int procesos_totales = atoi(line);          // Cuantos Procesos vendrán
 
-  Proceso *arreglo_procesos[procesos_totales];
+  Process *arreglo_procesos[procesos_totales];
 
   for (int i = 0; i < procesos_totales; i++)  // Lee cada proceso.
   {
-    arreglo_procesos[i] = (Proceso*)malloc(sizeof(Proceso));
+    arreglo_procesos[i] = (Process*)malloc(sizeof(Process));
 
     fgets(line, sizeof(line), file);
     token    = strtok(line, " ");
@@ -55,7 +62,7 @@ int main(int argc, char *argv[])
     {                                         // El contador_arg se encarga de ver en que argumento vamos.
       if (contador_arg == 0)
       {
-        strcpy(arreglo_procesos[i]->nombre, token); // Lee el nombre 
+        strcpy(arreglo_procesos[i]->nombre, token); // Lee el nombre
       }
       else if (contador_arg == 1)
       {
@@ -63,7 +70,7 @@ int main(int argc, char *argv[])
       }
       else if (contador_arg == 2)
       {
-        arreglo_procesos[i]->tiempo_inicio = atoi(token); // Lee el tiempo total
+        arreglo_procesos[i]->init_time = atoi(token); // Lee el tiempo total
       }
       else if (contador_arg == 3)
       {
@@ -86,6 +93,7 @@ int main(int argc, char *argv[])
     
   }
 
+  /*
   for (int i = 0; i < procesos_totales; i++) // Verificamos si la informacion se leyó correctamente.
   {
     printf("Nombre Proceso: %s\n", arreglo_procesos[i]->nombre);
@@ -95,6 +103,7 @@ int main(int argc, char *argv[])
     printf("CPU_burst: %i\n",      arreglo_procesos[i]->CPU_burst);
     printf("IO_burst: %i\n",      arreglo_procesos[i]->IO_burst);
   }
+  */
 
   for (int i = 0; i < procesos_totales; i++) // Libero memoria arreglo.
   {
