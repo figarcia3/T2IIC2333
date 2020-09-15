@@ -20,7 +20,7 @@ typedef struct process
   Burst *burst_head;
   Burst *burst_tail;
 
-  Process *next;
+  struct process *next;
 
   int state;
 
@@ -28,13 +28,16 @@ typedef struct process
 
 typedef struct queue
 {
-  Process *head_process;
-  Process *tail_process;
+  Process *head_process_inactive;
+  Process *tail_process_inactive;
+  Process *head_process_ready;
+  Process *tail_process_ready;
 } Queue;
 
 void     freeList(Burst* head);
 void     FreeMem(Queue *cola, int total_process);
-void     Print(Queue *cola, int total_process);
+void     Print(Queue *cola);
 void     add_burst(Process *proceso, int time);
-Queue*   init_queue(int procesos_totales);
+Queue*   init_queue();
 Process* init_process();
+void     add_process_inactive(Queue* cola, Process* process);

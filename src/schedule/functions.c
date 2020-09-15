@@ -14,7 +14,7 @@ void FreeList(Burst* head) // Bibliografia
       free(tmp);
   }
 }
-
+/*
 void FreeMem(Queue *cola, int total_process)
 {
   for (int i = 0; i < total_process; i++) // Libero memoria arreglo.
@@ -24,28 +24,30 @@ void FreeMem(Queue *cola, int total_process)
   }
   free(cola -> array); // liberando Arreglo
   free(cola); // liberando cola
-}
+}*/
 
-void Print(Queue *cola, int total_process)
+void Print(Queue *cola)
 {
-  Burst *tmp;
+  Burst* tmp;
+  Process* tmp_process;
 
-  for (int i = 0; i < total_process; i++) // Verificamos si la informacion se leyó correctamente. 
+  tmp_process = cola -> head_process_inactive;
+
+  while (tmp_process)
   {
-  printf("Nombre Proceso: %s\n", cola->array[i]->nombre);
-  printf("Pid: %i\n",            cola->array[i]->pid);
-  printf("Inicio: %i\n",         cola->array[i]->init_time);
-  printf("Deadline: %i\n",       cola->array[i]->deadline);
-  printf("CPU_burst: %i\n",      cola->array[i]->CPU_burst);
-
-  tmp = cola->array[i] -> burst_head;
-  
+    printf("Nombre Proceso: %s\n", tmp_process->nombre);
+    printf("Pid: %i\n",            tmp_process->pid);
+    printf("Inicio: %i\n",         tmp_process->init_time);
+    printf("Deadline: %i\n",       tmp_process->deadline);
+    printf("CPU_burst: %i\n",      tmp_process->CPU_burst);
+    tmp = tmp_process-> burst_head;
     while (tmp)
     {
       printf("burst: %i\n", tmp -> burst_time);
       tmp = tmp -> next;
     }
-  }
+    tmp_process = tmp_process -> next;
+  } 
 }
 
 void add_burst(Process *proceso, int time) // Agrega un Burst al final de la cola.
@@ -75,17 +77,58 @@ void add_burst(Process *proceso, int time) // Agrega un Burst al final de la col
   }
 }
 
-Queue* init_queue(int procesos_totales)
+Queue* init_queue()
 {
   Queue* cola = malloc(sizeof(Queue));
-  cola -> head_process = NULL;
-  cola -> tail_process = NULL;
+  cola -> head_process_inactive = NULL;
+  cola -> tail_process_inactive = NULL;
+  cola -> head_process_ready    = NULL;
+  cola -> tail_process_ready    = NULL;
   return cola;
+}
+
+void add_process_inactive(Queue* cola, Process* process)
+{
+  if (!(cola -> head_process_inactive)) // Raul
+  {
+    cola -> head_process_inactive = process;
+    cola -> tail_process_inactive = process;
+    return;
+  }
+
+  if (process -> init_time <= cola -> head_process_inactive->init_time)
+  {
+    process -> next               = cola -> head_process_inactive;
+    cola -> head_process_inactive = process;
+    return;
+  }
+
+  if (process -> init_time >= cola -> tail_process_inactive->init_time)
+  {
+    cola -> tail_process_inactive -> next = process;
+    cola -> tail_process_inactive         = process;
+    return;
+  }
+
+  Process* last_process    = cola -> head_process_inactive;
+  Process* current_process = last_process -> next;
+  while (current_process)
+  {
+    if (process -> init_time <= current_process->init_time)
+    {
+      last_process -> next = process;
+      process -> next      = current_process;
+      return;
+    }
+    last_process    = current_process;
+    current_process = current_process -> next;
+  }
 }
 
 Process* init_process()
 {
   Process* process = malloc(sizeof(Process));
   process -> state = 0;
+  process -> next = NULL;
   return process;
 }

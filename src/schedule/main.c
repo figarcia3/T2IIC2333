@@ -57,15 +57,15 @@ int main(int argc, char *argv[])
       {
         add_burst(process, atoi(token));
       }
-      add_process(cola, process);
       token = strtok(NULL, " ");
       ++contador_arg;
     }
+    add_process_inactive(cola, process);
   }
 
-  Print(cola, procesos_totales);
+  Print(cola);
 
-  FreeMem(cola, procesos_totales);
+  //FreeMem(cola, procesos_totales);
 
   fclose(file);
 
