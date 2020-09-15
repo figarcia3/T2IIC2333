@@ -21,14 +21,11 @@ int main(int argc, char *argv[])
 
   fgets(line, sizeof(line), file);            // Leo la primera linea
   int procesos_totales = atoi(line);          // Cuantos Procesos vendrán
-
-  Process *arreglo_procesos[procesos_totales];
+  Queue* cola = init_queue();
 
   for (int i = 0; i < procesos_totales; i++)  // Lee cada proceso.
   {
-    arreglo_procesos[i] = (Process*)malloc(sizeof(Process));
-    arreglo_procesos[i] -> burst_head = NULL;
-    arreglo_procesos[i] -> burst_tail = NULL;
+    Process* process = init_process();
 
     fgets(line, sizeof(line), file);
     token    = strtok(line, " ");
@@ -38,36 +35,37 @@ int main(int argc, char *argv[])
     {                                         // El contador_arg se encarga de ver en que argumento vamos.
       if (contador_arg == 0)
       {
-        strcpy(arreglo_procesos[i]->nombre, token); // Lee el nombre
+        strcpy(process->nombre, token); // Lee el nombre
       }
       else if (contador_arg == 1)
       {
-        arreglo_procesos[i]->pid = atoi(token);     // Lee el PID
+        process->pid = atoi(token);     // Lee el PID
       }
       else if (contador_arg == 2)
       {
-        arreglo_procesos[i]->init_time = atoi(token); // Lee el tiempo total
+        process->init_time = atoi(token); // Lee el tiempo total
       }
       else if (contador_arg == 3)
       {
-        arreglo_procesos[i]->deadline = atoi(token);  // Lee el deadline
+        process->deadline = atoi(token);  // Lee el deadline
       }
       else if (contador_arg == 4)
       {
-        arreglo_procesos[i]->CPU_burst = atoi(token);
+        process->CPU_burst = atoi(token);
       }
       else
       {
-        add_burst(arreglo_procesos[i], atoi(token));
+        add_burst(process, atoi(token));
       }
+      add_process(cola, process);
       token = strtok(NULL, " ");
       ++contador_arg;
     }
   }
 
-  Print(arreglo_procesos, procesos_totales);
+  Print(cola, procesos_totales);
 
-  FreeMem(arreglo_procesos, procesos_totales);
+  FreeMem(cola, procesos_totales);
 
   fclose(file);
 
