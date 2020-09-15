@@ -1,35 +1,9 @@
+#include "structs.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-
-typedef struct process
-{
-  char nombre[32];
-  int pid;
-  int init_time;
-  int deadline;
-  int CPU_burst;
-  int IO_burst;
-
-  Burst *burst_linked; // 2 * cpu_burst - 1
-
-  int state;
-} Process;
-
-typedef struct burst
-{
-  int type;
-  int exec_time;
-  Burst *next;
-} Burst;
-
-typedef struct queu
-{
-  Process *array;
-} Queu;
 
 int main(int argc, char *argv[])
 {
@@ -53,6 +27,9 @@ int main(int argc, char *argv[])
   for (int i = 0; i < procesos_totales; i++)  // Lee cada proceso.
   {
     arreglo_procesos[i] = (Process*)malloc(sizeof(Process));
+    arreglo_procesos[i] -> burst_head = NULL;
+    arreglo_procesos[i] -> burst_tail = NULL;
+    
 
     fgets(line, sizeof(line), file);
     token    = strtok(line, " ");
@@ -79,37 +56,22 @@ int main(int argc, char *argv[])
       else if (contador_arg == 4)
       {
         arreglo_procesos[i]->CPU_burst = atoi(token);
-        arreglo_procesos[i]->IO_burst  = atoi(token) - 1; 
       }
       else
       {
-        /* Aqui va la estructura que le daremos a los diferentes CPU_burst y IO_burst */
+          add_burst(arreglo_procesos[i], atoi(token));
       }
-      
 
       token = strtok(NULL, " ");
       ++contador_arg;
+
     }
-    
   }
 
-  /*
-  for (int i = 0; i < procesos_totales; i++) // Verificamos si la informacion se leyó correctamente.
-  {
-    printf("Nombre Proceso: %s\n", arreglo_procesos[i]->nombre);
-    printf("Pid: %i\n",            arreglo_procesos[i]->pid);
-    printf("Inicio: %i\n",         arreglo_procesos[i]->tiempo_inicio);
-    printf("Deadline: %i\n",       arreglo_procesos[i]->deadline);
-    printf("CPU_burst: %i\n",      arreglo_procesos[i]->CPU_burst);
-    printf("IO_burst: %i\n",      arreglo_procesos[i]->IO_burst);
-  }
-  */
+  Print(arreglo_procesos, procesos_totales);
 
-  for (int i = 0; i < procesos_totales; i++) // Libero memoria arreglo.
-  {
-    free(arreglo_procesos[i]);
-  }
-  
+  freeMem(arreglo_procesos, procesos_totales);
+
   fclose(file);
 
   return 0;
