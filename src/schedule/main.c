@@ -1,9 +1,10 @@
-#include "structs.h"
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "Queue.h"
+#include "Process.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
 
   fgets(line, sizeof(line), file);            // Leo la primera linea
   int procesos_totales = atoi(line);          // Cuantos Procesos vendrán
-  Queue* cola = init_queue();
+  Queue* cola = init_queue(procesos_totales);
 
   for (int i = 0; i < procesos_totales; i++)  // Lee cada proceso.
   {
@@ -63,9 +64,25 @@ int main(int argc, char *argv[])
     add_process_inactive(cola, process);
   }
 
+  int time = 0;
+  while (true)
+  {
+    update_queue(cola, time);
+    if (!(cola -> pending_processes))
+    {
+      break;
+    }
+
+    if (time == 10) 
+    {
+      break;
+    }
+    time ++;
+  }
+  
   Print(cola);
 
-  //FreeMem(cola, procesos_totales);
+  destroy_queue(cola);
 
   fclose(file);
 
