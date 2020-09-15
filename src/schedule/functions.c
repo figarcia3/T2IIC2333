@@ -4,7 +4,7 @@
 
 #include "structs.h"
 
-void freeList(Burst* head)
+void FreeList(Burst* head)
 {
   Burst* tmp;
   while (head)
@@ -15,11 +15,11 @@ void freeList(Burst* head)
   }
 }
 
-void freeMem(Process *arreglo_process[], int total_process)
+void FreeMem(Process *arreglo_process[], int total_process)
 {
   for (int i = 0; i < total_process; i++) // Libero memoria arreglo.
   {
-    freeList(arreglo_process[i]->burst_head);
+    FreeList(arreglo_process[i]->burst_head);
     free(arreglo_process[i]);
   }
 }
@@ -40,7 +40,7 @@ void Print(Process *arreglo_process[], int total_process)
   
   while (tmp)
   {
-    printf("type: %i, time: %i\n", tmp -> type, tmp -> burst_time);
+    printf("burst: %i\n", tmp -> type, tmp -> burst_time);
     tmp = tmp -> next;
   }
   }

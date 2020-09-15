@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
     arreglo_procesos[i] = (Process*)malloc(sizeof(Process));
     arreglo_procesos[i] -> burst_head = NULL;
     arreglo_procesos[i] -> burst_tail = NULL;
-    
 
     fgets(line, sizeof(line), file);
     token    = strtok(line, " ");
@@ -59,18 +58,16 @@ int main(int argc, char *argv[])
       }
       else
       {
-          add_burst(arreglo_procesos[i], atoi(token));
+        add_burst(arreglo_procesos[i], atoi(token));
       }
-
       token = strtok(NULL, " ");
       ++contador_arg;
-
     }
   }
 
   Print(arreglo_procesos, procesos_totales);
 
-  freeMem(arreglo_procesos, procesos_totales);
+  FreeMem(arreglo_procesos, procesos_totales);
 
   fclose(file);
 

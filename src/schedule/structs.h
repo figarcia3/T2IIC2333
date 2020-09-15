@@ -4,7 +4,9 @@ typedef struct burst
 {
   int type;
   int burst_time;
+
   struct burst *next;
+
 } Burst;
 
 typedef struct process
@@ -19,12 +21,13 @@ typedef struct process
   Burst *burst_tail;
 
   int state;
+
 } Process;
 
-typedef struct queu
+typedef struct queue
 {
   Process *array;
-} Queu;
+} Queue;
 
 void freeList(Burst* head);
 void freeMem(Process *arreglo_process[], int total_process);
