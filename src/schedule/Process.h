@@ -25,6 +25,12 @@ struct process
   Process* next;
 
   int state;
+  int turnos_CPU;
+  int interrupciones;
+  int turnaround_time;
+  int response_time;
+  int waiting_time;
+  int completed_deadline;
 
 };
 

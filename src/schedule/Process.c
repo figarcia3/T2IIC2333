@@ -76,6 +76,22 @@ void destroy_processes(Process* current_process)
   }
 }
 
+void output_process(char* name, Process* process)
+{
+  FILE* file = fopen(name, "w+");
+  
+  Process* current = process;
+  while(current)
+  {
+    fprintf(file, "%s,%i,%i,%i,%i,%i,%i", current->nombre,current->turnos_CPU,current->interrupciones,
+                                          current->turnaround_time,current->response_time,current->waiting_time,
+                                          current->completed_deadline);
+    current = current -> next;
+  }
+
+  fclose(file);
+}
+
 void print_process(Process *process)
 {
   Burst* tmp;

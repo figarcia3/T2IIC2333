@@ -308,5 +308,6 @@ void destroy_queue(Queue* cola)
 {
   destroy_processes(cola -> head_process_inactive);
   destroy_processes(cola -> head_process_ready);
+  destroy_processes(cola -> head_process_finished);
   free(cola);
 }

@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
     add_process_inactive(cola, process);
   }
 
+  fclose(file);
+
   int time = 0;
   while (true)
   {
@@ -87,9 +89,9 @@ int main(int argc, char *argv[])
       break;
     }
 
-    update_waiting(cola); // wating -> ready
+    update_waiting(cola);         // wating -> ready
     update_inactive(cola, time);  // inactive -> ready
-    update_ready(cola, cpu); // ready -> cpu
+    update_ready(cola, cpu);      // ready -> cpu
     time ++;
   }
   
@@ -101,11 +103,12 @@ int main(int argc, char *argv[])
   print_process(cola->head_process_ready);
   printf("---------------------------------\n");
   print_process(cola->head_process_waiting);
+  printf("---------------------------------\n");
+  print_process(cola->head_process_finished);
 
-  //destroy_queue(cola);
-  //destroy_cpu(cpu);
-
-  fclose(file);
+  output(argv[2], cola->head_process_finished);
+  destroy_queue(cola);
+  destroy_cpu(cpu);
 
   return 0;
 }
