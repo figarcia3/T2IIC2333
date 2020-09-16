@@ -80,19 +80,16 @@ int main(int argc, char *argv[])
   int time = 0;
   while (true)
   {
-    update_waiting(cola);
-    update_inactive(cola, time);
-    update_ready(cola, cpu);
-    update_cpu(cola, cpu);
+    update_cpu(cola, cpu); // ejecutamos CPU (cpu -> waiting o finished)
+
     if (!(cola -> pending_processes))
     {
       break;
     }
 
-    if (time == 15) 
-    {
-      break;
-    }
+    update_waiting(cola); // wating -> ready
+    update_inactive(cola, time);  // inactive -> ready
+    update_ready(cola, cpu); // ready -> cpu
     time ++;
   }
   

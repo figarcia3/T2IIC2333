@@ -6,13 +6,16 @@
 Queue* init_queue(int pending_process)
 {
   Queue* cola = malloc(sizeof(Queue));
-  cola -> pending_processes     = pending_process;
-  cola -> head_process_inactive = NULL;
-  cola -> tail_process_inactive = NULL;
-  cola -> head_process_ready    = NULL;
-  cola -> tail_process_ready    = NULL;
-  cola -> head_process_waiting  = NULL;
-  cola -> tail_process_waiting  = NULL;
+  cola -> pending_processes      = pending_process;
+  cola -> head_process_inactive  = NULL;
+  cola -> tail_process_inactive  = NULL;
+  cola -> head_process_ready     = NULL;
+  cola -> tail_process_ready     = NULL;
+  cola -> head_process_waiting   = NULL;
+  cola -> tail_process_waiting   = NULL;
+  cola -> head_process_finished  = NULL;
+  cola -> tail_process_finished  = NULL;
+
   return cola;
 }
 
@@ -137,6 +140,59 @@ void add_process_waiting(Queue* cola, Process* process)
   }
 }
 
+void add_process_finished(Queue* cola, Process* process)
+{
+  cola -> pending_processes--;
+  if (!(cola -> head_process_finished))
+  {
+    cola -> head_process_finished = process;
+    cola -> tail_process_finished = process;
+  }
+  else
+  {
+    cola -> tail_process_finished -> next = process;
+    cola -> tail_process_finished = process; 
+  }
+}
+
+void update_inactive(Queue* cola, int time)
+{
+  Process* next_process;
+  Process* current_process = cola->head_process_inactive;
+  while(current_process)
+  {
+    if (current_process->init_time == time)
+    {
+      next_process           = current_process->next;
+      current_process->next  = NULL;
+      current_process->state = 1;
+      add_process_ready(cola, current_process);
+      current_process             = next_process;
+      cola->head_process_inactive = current_process;
+      continue;
+    }
+    break;
+  }
+}
+
+void update_ready(Queue* cola, CPU* cpu)
+{
+    Process* break_process;
+    Process* current_process = cola -> head_process_ready;
+    while(current_process)
+    {
+        cola -> head_process_ready = current_process -> next;
+        current_process -> next    = NULL;
+        break_process = add_process_cpu(cpu, current_process);
+        if (break_process)
+        {
+            add_process_ready(cola, break_process);
+            break;
+        }
+        current_process = cola -> head_process_ready;
+    }
+}
+
 void update_waiting(Queue* cola)
 {
   Process* last_process = NULL;
@@ -187,50 +243,11 @@ void update_waiting(Queue* cola)
   }
 }
 
-
-void update_inactive(Queue* cola, int time)
-{
-  Process* next_process;
-  Process* current_process = cola->head_process_inactive;
-  while(current_process)
-  {
-    if (current_process->init_time == time)
-    {
-      next_process           = current_process->next;
-      current_process->next  = NULL;
-      current_process->state = 1;
-      add_process_ready(cola, current_process);
-      current_process             = next_process;
-      cola->head_process_inactive = current_process;
-      continue;
-    }
-    break;
-  }
-}
-
-void update_ready(Queue* cola, CPU* cpu)
-{
-    Process* break_process;
-    Process* current_process = cola -> head_process_ready;
-    while(current_process)
-    {
-        cola -> head_process_ready = current_process -> next;
-        current_process -> next    = NULL;
-        break_process = add_process_cpu(cpu, current_process);
-        if (break_process)
-        {
-            add_process_ready(cola, break_process);
-            break;
-        }
-        current_process = cola -> head_process_ready;
-    }
-}
-
 void extract_process_cpu(Queue* cola, Process* process)
 {
     if (!process -> burst_head)
     {
-        destroy_process(process);
+        add_process_finished(cola, process);
     }
     else
     {
