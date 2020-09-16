@@ -30,3 +30,8 @@ struct process
 
 Process* init_process();
 void     add_burst(Process *proceso, int time);
+void     destroy_burst(Process* process);
+void     destroy_bursts(Burst* current_burst);
+void     destroy_process(Process* process);
+void     destroy_processes(Process* current_process);
+void     print_process(Process *process);

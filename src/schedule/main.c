@@ -5,6 +5,7 @@
 
 #include "Queue.h"
 #include "Process.h"
+#include "CPU.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,12 +17,24 @@ int main(int argc, char *argv[])
   char line[2048];
   char *token;
   int contador_arg;
+  int count_cpu;
+
+  if (argv[3])
+  {
+    count_cpu = atoi(argv[3]);
+  }
+  else
+  {
+    count_cpu = 1;
+  }
 
   // Leo el archivo
   FILE *file = fopen(argv[1], "r");
 
   fgets(line, sizeof(line), file);            // Leo la primera linea
   int procesos_totales = atoi(line);          // Cuantos Procesos vendrán
+
+  CPU* cpu = init_cpu(count_cpu);
   Queue* cola = init_queue(procesos_totales);
 
   for (int i = 0; i < procesos_totales; i++)  // Lee cada proceso.
@@ -67,22 +80,33 @@ int main(int argc, char *argv[])
   int time = 0;
   while (true)
   {
-    update_queue(cola, time);
+    update_waiting(cola);
+    update_inactive(cola, time);
+    update_ready(cola, cpu);
+    update_cpu(cola, cpu);
     if (!(cola -> pending_processes))
     {
       break;
     }
 
-    if (time == 10) 
+    if (time == 15) 
     {
       break;
     }
     time ++;
   }
   
-  Print(cola);
 
-  destroy_queue(cola);
+  print_process(cpu -> head_process);
+  printf("---------------------------------\n");
+  print_process(cola->head_process_inactive);
+  printf("---------------------------------\n");
+  print_process(cola->head_process_ready);
+  printf("---------------------------------\n");
+  print_process(cola->head_process_waiting);
+
+  //destroy_queue(cola);
+  //destroy_cpu(cpu);
 
   fclose(file);
 

@@ -39,3 +39,63 @@ void add_burst(Process *proceso, int time) // Agrega un Burst al final de la col
     proceso -> burst_tail = burst;
   }
 }
+
+void destroy_burst(Process* process)
+{
+  Burst* delete_burst   = process -> burst_head;
+  process -> burst_head = process -> burst_head -> next;
+  free(delete_burst);
+}
+
+void destroy_bursts(Burst* current_burst)
+{
+  Burst* next_burst;
+  while (current_burst)
+  {
+    next_burst = current_burst -> next;
+    free(current_burst);
+    current_burst = next_burst;
+  }
+  
+}
+
+void destroy_process(Process* process)
+{
+  free(process);
+}
+
+void destroy_processes(Process* current_process)
+{
+  Process* next_process;
+  while (current_process)
+  {
+    destroy_bursts(current_process -> burst_head);
+    next_process = current_process -> next;
+    free(current_process);
+    current_process = next_process;
+  }
+}
+
+void print_process(Process *process)
+{
+  Burst* tmp;
+  Process* tmp_process;
+
+  tmp_process = process;
+
+  while (tmp_process)
+  {
+    printf("Nombre Proceso: %s\n", tmp_process->nombre);
+    printf("Pid: %i\n",            tmp_process->pid);
+    printf("Inicio: %i\n",         tmp_process->init_time);
+    printf("Deadline: %i\n",       tmp_process->deadline);
+    printf("CPU_burst: %i\n",      tmp_process->CPU_burst);
+    tmp = tmp_process-> burst_head;
+    while (tmp)
+    {
+      printf("burst: %i\n", tmp -> burst_time);
+      tmp = tmp -> next;
+    }
+    tmp_process = tmp_process -> next;
+  } 
+}

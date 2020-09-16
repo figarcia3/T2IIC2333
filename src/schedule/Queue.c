@@ -11,6 +11,8 @@ Queue* init_queue(int pending_process)
   cola -> tail_process_inactive = NULL;
   cola -> head_process_ready    = NULL;
   cola -> tail_process_ready    = NULL;
+  cola -> head_process_waiting  = NULL;
+  cola -> tail_process_waiting  = NULL;
   return cola;
 }
 
@@ -121,7 +123,72 @@ void add_process_ready(Queue* cola, Process* process)
   }
 }
 
-void update_queue(Queue* cola, int time)
+void add_process_waiting(Queue* cola, Process* process)
+{
+  if (!(cola->head_process_waiting))
+  {
+    cola -> head_process_waiting = process;
+    cola -> tail_process_waiting = process;
+  }
+  else
+  {
+    cola -> tail_process_waiting -> next = process;
+    cola -> tail_process_waiting = process;
+  }
+}
+
+void update_waiting(Queue* cola)
+{
+  Process* last_process = NULL;
+  Process* current_process = cola -> head_process_waiting;
+  while (current_process)
+  {
+    current_process -> burst_head -> burst_time--;
+    if (current_process -> burst_head -> burst_time == 0)       // Un IO Burst llega a 0. Debemos mover el proceso a ready.
+    {
+      destroy_burst(current_process);
+      if (current_process == cola -> head_process_waiting)      // El proceso está al inicio.
+      {
+        if (current_process == cola -> tail_process_waiting)
+        {
+          current_process -> next = NULL;
+          add_process_ready(cola, current_process);
+          cola -> head_process_waiting = NULL;
+          cola -> tail_process_waiting = NULL;
+          break;
+        }
+        else
+        {
+          cola -> head_process_waiting = current_process -> next;
+          current_process -> next      = NULL;
+          add_process_ready(cola, current_process);
+          current_process = cola -> head_process_waiting;
+          continue;
+        }
+      }
+      else if (current_process == cola -> tail_process_waiting) // El proceso está al final. Al llega al final, debemos salir.
+      {
+        last_process -> next         = NULL;
+        cola -> tail_process_waiting = last_process;
+        current_process -> next      = NULL;
+        add_process_ready(cola, current_process);
+        break;
+      }
+      else // El proceso está al medio de 2 procesos.
+      {
+        last_process -> next    = current_process -> next;
+        current_process -> next = NULL;
+        add_process_ready(cola, current_process);
+        current_process = last_process -> next;
+      }
+    }
+    last_process    = current_process;
+    current_process = current_process -> next;
+  }
+}
+
+
+void update_inactive(Queue* cola, int time)
 {
   Process* next_process;
   Process* current_process = cola->head_process_inactive;
@@ -138,55 +205,86 @@ void update_queue(Queue* cola, int time)
       continue;
     }
     break;
-  } 
+  }
 }
 
-void Print(Queue *cola)
+void update_ready(Queue* cola, CPU* cpu)
 {
-  Burst* tmp;
-  Process* tmp_process;
-
-  tmp_process = cola -> head_process_ready;
-
-  while (tmp_process)
-  {
-    printf("Nombre Proceso: %s\n", tmp_process->nombre);
-    printf("Pid: %i\n",            tmp_process->pid);
-    printf("Inicio: %i\n",         tmp_process->init_time);
-    printf("Deadline: %i\n",       tmp_process->deadline);
-    printf("CPU_burst: %i\n",      tmp_process->CPU_burst);
-    tmp = tmp_process-> burst_head;
-    while (tmp)
+    Process* break_process;
+    Process* current_process = cola -> head_process_ready;
+    while(current_process)
     {
-      printf("burst: %i\n", tmp -> burst_time);
-      tmp = tmp -> next;
+        cola -> head_process_ready = current_process -> next;
+        current_process -> next    = NULL;
+        break_process = add_process_cpu(cpu, current_process);
+        if (break_process)
+        {
+            add_process_ready(cola, break_process);
+            break;
+        }
+        current_process = cola -> head_process_ready;
     }
-    tmp_process = tmp_process -> next;
-  } 
 }
 
-void destroy_bursts(Burst* current_burst)
+void extract_process_cpu(Queue* cola, Process* process)
 {
-  Burst* next_burst;
-  while (current_burst)
-  {
-    next_burst = current_burst -> next;
-    free(current_burst);
-    current_burst = next_burst;
-  }
-  
+    if (!process -> burst_head)
+    {
+        destroy_process(process);
+    }
+    else
+    {
+        add_process_waiting(cola, process);
+    }
 }
 
-void destroy_processes(Process* current_process)
+void update_cpu(Queue* cola, CPU* cpu)
 {
-  Process* next_process;
-  while (current_process)
-  {
-    destroy_bursts(current_process -> burst_head);
-    next_process = current_process -> next;
-    free(current_process);
-    current_process = next_process;
-  }
+    Process* last_process    = NULL;
+    Process* current_process = cpu -> head_process;
+
+    while (current_process)
+    {
+        current_process -> burst_head -> burst_time--;
+        if (current_process -> burst_head -> burst_time == 0)
+        {
+            destroy_burst(current_process);
+            if ((!last_process) && (current_process == cpu -> tail_process))
+            {
+                current_process -> next = NULL;
+                extract_process_cpu(cola, current_process);
+                cpu -> head_process = NULL;
+                cpu -> tail_process = NULL;
+                break;
+            }
+
+            else if (!last_process)
+            {
+                cpu -> head_process      = current_process -> next;
+                current_process -> next  = NULL;
+                extract_process_cpu(cola, current_process);
+                current_process = cpu -> head_process;
+                continue;
+            }
+
+            if (current_process == cpu -> tail_process)
+            {
+                last_process -> next    = NULL;
+                cpu -> tail_process     = last_process;
+                current_process -> next = NULL;
+                extract_process_cpu(cola, current_process);
+                break;
+            }
+            
+            last_process -> next    = current_process -> next;
+            current_process -> next = NULL;
+            extract_process_cpu(cola, current_process);
+            current_process = last_process -> next;
+        }
+
+        last_process    = current_process;
+        current_process = current_process -> next;
+    }
 }
 
 void destroy_queue(Queue* cola)
