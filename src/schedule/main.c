@@ -82,31 +82,21 @@ int main(int argc, char *argv[])
   int time = 0;
   while (true)
   {
-    update_cpu(cola, cpu); // ejecutamos CPU (cpu -> waiting o finished)
+    update_cpu(cola, cpu, time); // ejecutamos CPU (cpu -> waiting o finished)
+
+    update_inactive(cola, time);        // inactive -> ready
+    update_ready(cola, cpu, time);      // ready -> cpu
+    update_waiting(cola);               // wating -> ready
 
     if (!(cola -> pending_processes))
     {
       break;
     }
 
-    update_waiting(cola);         // wating -> ready
-    update_inactive(cola, time);  // inactive -> ready
-    update_ready(cola, cpu);      // ready -> cpu
     time ++;
   }
-  
 
-  print_process(cpu -> head_process);
-  printf("---------------------------------\n");
-  print_process(cola->head_process_inactive);
-  printf("---------------------------------\n");
-  print_process(cola->head_process_ready);
-  printf("---------------------------------\n");
-  print_process(cola->head_process_waiting);
-  printf("---------------------------------\n");
-  print_process(cola->head_process_finished);
-
-  output(argv[2], cola->head_process_finished);
+  output_process(argv[2], cola->head_process_finished);
   destroy_queue(cola);
   destroy_cpu(cpu);
 

@@ -5,11 +5,20 @@
 
 Process* init_process()
 {
-  Process* process      = malloc(sizeof(Process));
-  process -> state      = 0;
-  process -> next       = NULL;
-  process -> burst_head = NULL;
-  process -> burst_tail = NULL;
+  Process* process              = malloc(sizeof(Process));
+  process -> state              = 0;
+  process -> next               = NULL;
+  process -> burst_head         = NULL;
+  process -> burst_tail         = NULL;
+  process -> response_bool      = 0;
+  process -> response_time      = 0;
+  process -> turnos_CPU         = 0;
+  process -> interrupciones     = 0; 
+  process -> turnaround_time    = 0;
+  process -> ready_time         = 0;
+  process -> response_time      = 0;
+  process -> waiting_time       = 0;
+  process -> completed_deadline = 0;
   return process;
 }
 
@@ -83,12 +92,11 @@ void output_process(char* name, Process* process)
   Process* current = process;
   while(current)
   {
-    fprintf(file, "%s,%i,%i,%i,%i,%i,%i", current->nombre,current->turnos_CPU,current->interrupciones,
-                                          current->turnaround_time,current->response_time,current->waiting_time,
-                                          current->completed_deadline);
+    fprintf(file, "%s,%i,%i,%i,%i,%i,%i\n", current->nombre,current->turnos_CPU,current->interrupciones,
+                                            current->turnaround_time,current->response_time,current->waiting_time,
+                                            current->completed_deadline);
     current = current -> next;
   }
-
   fclose(file);
 }
 

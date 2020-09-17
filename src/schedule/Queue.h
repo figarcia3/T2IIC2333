@@ -26,6 +26,6 @@ void   add_process_waiting(Queue* cola, Process* process);
 
 void   update_waiting(Queue* cola);
 void   update_inactive(Queue* cola, int time);
-void   update_ready(Queue* cola, CPU* cpu);
-void   update_cpu(Queue* cola, CPU* cpu);
+void   update_ready(Queue* cola, CPU* cpu, int time);
+void   update_cpu(Queue* cola, CPU* cpu, int time);
 void   destroy_queue(Queue* cola);

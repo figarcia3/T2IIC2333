@@ -17,6 +17,7 @@ Process* add_process_cpu(CPU* cpu, Process* process)
 {
     if (!(cpu -> head_process))
     {
+        process -> turnos_CPU++;
         cpu -> head_process = process;
         cpu -> tail_process = process;
         cpu -> max_deadline = process -> deadline;
@@ -26,7 +27,14 @@ Process* add_process_cpu(CPU* cpu, Process* process)
 
     if (cpu -> count_process < cpu -> max_process)
     {
-        cpu -> count_process ++;
+        cpu -> count_process++;
+        process -> turnos_CPU++;
+
+        if (cpu -> max_deadline < process -> deadline)
+        {
+            cpu -> max_deadline = process -> deadline;
+        }
+
         if (process -> deadline == cpu -> head_process -> deadline)
             {
                 if (process -> pid > cpu -> head_process -> pid)

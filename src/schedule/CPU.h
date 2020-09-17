@@ -9,6 +9,7 @@ struct cpu
     int max_deadline;
     int max_process;
     int count_process;
+
     Process* head_process;
     Process* tail_process;
   
