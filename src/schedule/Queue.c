@@ -225,6 +225,7 @@ void update_waiting(Queue* cola)
   Process* current_process = cola -> head_process_waiting;
   while (current_process)
   {
+    current_process -> waiting_time++;
     current_process -> burst_head -> burst_time--;
     if (current_process -> burst_head -> burst_time == 0)       // Un IO Burst llega a 0. Debemos mover el proceso a ready.
     {
@@ -265,7 +266,6 @@ void update_waiting(Queue* cola)
         continue;
       }
     }
-    current_process -> waiting_time++;
     last_process    = current_process;
     current_process = current_process -> next;
   }
